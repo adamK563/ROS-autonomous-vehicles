@@ -1,0 +1,4 @@
+roslibpy
+python-geometry-msgs
+sensor_msgs.msg 
+readchar
