@@ -1,17 +1,21 @@
-# Set the base image
-FROM python:3.9-slim-buster
+# Use the official ROS melodic image as the base image
+FROM ros:melodic
 
-# Set the working directory
-WORKDIR /app
+# Install additional dependencies
+RUN apt-get update && apt-get install -y \
+    ros-melodic-turtlebot3 \
+    ros-melodic-turtlebot3-msgs \
+    ros-melodic-turtlebot3-simulations \
+    && rm -rf /var/lib/apt/lists/*
 
-# Copy the requirements file to the working directory
-COPY requirements.txt .
+# Set up the workspace
+WORKDIR /catkin_ws
 
-# Install the required packages
-RUN pip install --no-cache-dir -r requirements.txt
+# Copy the TurtleBot3 simulation files into the workspace
+COPY . /catkin_ws
 
-# Copy the autocarPython.py file to the working directory
-COPY autocarPython.py .
+# Build the workspace
+RUN /bin/bash -c "source /opt/ros/melodic/setup.bash && catkin_make"
 
-# Set the command to run the autocarPython.py script
-CMD ["python", "autocarPython.py"]
+# Set the entry point to launch the TurtleBot3 simulation
+CMD /bin/bash -c "source /catkin_ws/devel/setup.bash && roslaunch turtlebot3_gazebo turtlebot3_empty_world.launch"
